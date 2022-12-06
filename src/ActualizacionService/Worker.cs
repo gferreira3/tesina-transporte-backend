@@ -23,7 +23,7 @@ namespace ActualizacionService
         {
             _logger = logger;
 
-            var mongoClient = new MongoClient("mongodb://localhost:27017");
+            var mongoClient = new MongoClient("mongodb://mongo:27017");
 
             var mongoDatabase = mongoClient.GetDatabase("transporte");
 
@@ -34,7 +34,10 @@ namespace ActualizacionService
         {
             _connectionFactory = new ConnectionFactory
             {
-                HostName = "localhost",
+                HostName = "rabbitmq",
+                Port = 5672,
+                UserName = "guest",
+                Password = "guest",
                 DispatchConsumersAsync = true
             };
             _connection = _connectionFactory.CreateConnection();

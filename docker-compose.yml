@@ -1,0 +1,44 @@
+version: "3.7"
+
+services:
+  mongo:        
+    image: mongo
+    restart: always
+    ports:
+      - "27019:27017"
+  rabbitmq: # login guest:guest
+    image: rabbitmq:3-management
+    hostname: "rabbitmq"
+    labels:
+      NAME: "rabbitmq"
+    ports:
+      - "4369:4369"
+      - "5671:5671"
+      - "5672:5672"
+      - "25672:25672"
+      - "15671:15671"
+      - "15673:15672"
+  actservice:
+    build:
+      context: ./src/ActualizacionService
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - rabbitmq
+      - mongo
+  extservice:
+    build:
+      context: ./src/ExtraccionService
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - rabbitmq
+  #transporteapi:
+  #  build:
+  #    context: .
+  #    dockerfile: C:\desa\tesina-transporte-backend\src\TransporteApi\Dockerfile
+  #  restart: always
+  #  ports:
+  #    - "8000:80"
+  #  depends_on:
+  #    - mongo
