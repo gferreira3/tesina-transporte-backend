@@ -33,12 +33,12 @@ services:
     restart: always
     depends_on:
       - rabbitmq
-  #transporteapi:
-  #  build:
-  #    context: .
-  #    dockerfile: C:\desa\tesina-transporte-backend\src\TransporteApi\Dockerfile
-  #  restart: always
-  #  ports:
-  #    - "8000:80"
-  #  depends_on:
-  #    - mongo
+  transporteapi:
+    build:
+      context: ./src/TransporteApi
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "8000:80"
+    depends_on:
+      - mongo

@@ -1,11 +1,15 @@
+using ExtraccionService.Dto;
 using RabbitMQ.Client;
 using System.Text;
+using System.Text.Json;
 
 namespace ExtraccionService
 {
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
+
+        private static readonly HttpClient client = new HttpClient();
 
         public Worker(ILogger<Worker> logger)
         {
@@ -18,25 +22,32 @@ namespace ExtraccionService
             {
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
+                // DOCKER
                 var factory = new ConnectionFactory() { HostName = "rabbitmq", Port = 5672, UserName = "guest", Password = "guest" };
-                using (var connection = factory.CreateConnection())
-                using (var channel = connection.CreateModel())
-                {
-                    channel.QueueDeclare(queue: "hello",
-                                 durable: false,
-                                 exclusive: false,
-                                 autoDelete: false,
-                                 arguments: null);
 
-                    string message = "Hello World!";
-                    var body = Encoding.UTF8.GetBytes(message);
+                // LOCALHOST
+                //var factory = new ConnectionFactory() { HostName = "localhost", Port = 5672, UserName = "guest", Password = "guest" };
+                
+                var connection = factory.CreateConnection();
+                var channel = connection.CreateModel();
 
-                    channel.BasicPublish(exchange: "",
-                                         routingKey: "hello",
-                                         basicProperties: null,
-                                         body: body);
-                    Console.WriteLine(" [x] Sent {0}", message);
-                }
+                channel.QueueDeclare(queue: "hello",
+                            durable: false,
+                            exclusive: false,
+                            autoDelete: false,
+                            arguments: null);
+
+                var stringTask = client.GetStreamAsync("https://apitransporte.buenosaires.gob.ar/colectivos/serviceAlerts?json=1&client_id=2e7a1773d08c43f9ace278cc7ae6bc38&client_secret=c4c35ed381984d03B025DfA3e9c4591b");
+
+                var alerts = await JsonSerializer.DeserializeAsync<ServiceAlert>(await stringTask);
+
+                var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(alerts.Entity));
+
+                channel.BasicPublish(exchange: "",
+                                    routingKey: "hello",
+                                    basicProperties: null,
+                                    body: body);
+                Console.WriteLine("Alertas enviadas!!!");
 
                 await Task.Delay(10000, stoppingToken);
             }

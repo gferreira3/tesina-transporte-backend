@@ -3,7 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace ActualizacionService.Model
 {
-    public  class Test
+    public  class Alerta
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]

@@ -1,9 +1,10 @@
+using ActualizacionService.Dto;
 using ActualizacionService.Model;
 using MongoDB.Driver;
-using MongoDB.Driver.Core.Connections;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
+using System.Text.Json;
 
 namespace ActualizacionService
 {
@@ -11,11 +12,11 @@ namespace ActualizacionService
     {
         private readonly ILogger<Worker> _logger;
 
-        private readonly IMongoCollection<Test> _testCollection;
+        private readonly IMongoCollection<Alerta> _alertaCollection;
 
         private ConnectionFactory _connectionFactory;
 
-        private RabbitMQ.Client.IConnection _connection;
+        private IConnection _connection;
 
         private IModel _channel;
 
@@ -23,18 +24,25 @@ namespace ActualizacionService
         {
             _logger = logger;
 
+            // DOCKER
             var mongoClient = new MongoClient("mongodb://mongo:27017");
+
+            // LOCALHOST
+            //var mongoClient = new MongoClient("mongodb://localhost:27017");
 
             var mongoDatabase = mongoClient.GetDatabase("transporte");
 
-            _testCollection = mongoDatabase.GetCollection<Test>("test");
+            _alertaCollection = mongoDatabase.GetCollection<Alerta>("alertas");
         }
 
         public override Task StartAsync(CancellationToken cancellationToken)
         {
             _connectionFactory = new ConnectionFactory
             {
+                // DOCKER
                 HostName = "rabbitmq",
+                // LOCALHOST
+                //HostName = "localhost",
                 Port = 5672,
                 UserName = "guest",
                 Password = "guest",
@@ -67,10 +75,15 @@ namespace ActualizacionService
                 var message = Encoding.UTF8.GetString(ea.Body.ToArray());
                 try
                 {
-                    Console.WriteLine(" [x] Received {0}", message);
+                    Console.WriteLine("Alertas recibidas!!!");
 
-                    _testCollection.InsertOne(new Test { Message = message });
+                    var entities = JsonSerializer.Deserialize<Entity[]>(message);
 
+                    foreach (var entity in entities)
+                    {
+                        var text = entity.Alert.DescriptionText.Translation[0].Text;
+                        _alertaCollection.InsertOne(new Alerta { Message = text });
+                    }
                     _channel.BasicAck(ea.DeliveryTag, false);
                 }
                 catch (Exception ex)
