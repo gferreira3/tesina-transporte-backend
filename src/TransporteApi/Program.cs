@@ -14,6 +14,12 @@ builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient("mongodb://mon
 //LOCALHOST
 //builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient("mongodb://localhost:27017"));
 
+builder.Services.AddCors(opt => 
+    opt.AddDefaultPolicy(policy => 
+        policy.AllowAnyOrigin()
+    )
+);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -22,6 +28,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors();
 
 app.MapGet("/colectivos/alertas", (IMongoClient client) =>
 {
