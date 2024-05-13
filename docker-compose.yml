@@ -3,14 +3,15 @@ version: "3.7"
 services:
   mongo:        
     image: mongo
+    container_name: mongo
     restart: always
     ports:
       - "27019:27017"
+    networks:
+      - tesina-network
   rabbitmq: # login guest:guest
     image: rabbitmq:3-management
-    hostname: "rabbitmq"
-    labels:
-      NAME: "rabbitmq"
+    container_name: rabbit
     ports:
       - "4369:4369"
       - "5671:5671"
@@ -18,7 +19,20 @@ services:
       - "25672:25672"
       - "15671:15671"
       - "15673:15672"
+    networks:
+      - tesina-network
+  extservice:
+    container_name: extservice
+    build:
+      context: ./src/ExtraccionService
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - rabbitmq
+    networks:
+      - tesina-network
   actservice:
+    container_name: actservice
     build:
       context: ./src/ActualizacionService
       dockerfile: Dockerfile
@@ -26,14 +40,10 @@ services:
     depends_on:
       - rabbitmq
       - mongo
-  extservice:
-    build:
-      context: ./src/ExtraccionService
-      dockerfile: Dockerfile
-    restart: always
-    depends_on:
-      - rabbitmq
+    networks:
+      - tesina-network
   transporteapi:
+    container_name: transporteapi
     build:
       context: ./src/TransporteApi
       dockerfile: Dockerfile
@@ -42,3 +52,9 @@ services:
       - "8000:80"
     depends_on:
       - mongo
+    networks:
+      - tesina-network
+
+networks:
+  tesina-network:
+    driver: bridge

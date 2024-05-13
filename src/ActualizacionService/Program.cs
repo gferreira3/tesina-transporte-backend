@@ -1,9 +1,11 @@
-using ActualizacionService;
+using ActualizacionService.Workers;
 
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
     {
-        services.AddHostedService<Worker>();
+        services.AddHostedService<SubtesWorker>();
+        services.AddHostedService<BicisStatusWorker>();
+        services.AddHostedService<BicisInfoWorker>();
     })
     .Build();
 

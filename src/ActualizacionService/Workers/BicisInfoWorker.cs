@@ -6,13 +6,13 @@ using RabbitMQ.Client.Events;
 using System.Text;
 using System.Text.Json;
 
-namespace ActualizacionService
+namespace ActualizacionService.Workers
 {
-    public class Worker : BackgroundService
+    public class BicisInfoWorker : BackgroundService
     {
-        private readonly ILogger<Worker> _logger;
+        private readonly ILogger<BicisInfoWorker> _logger;
 
-        private readonly IMongoCollection<Alerta> _alertaCollection;
+        private readonly IMongoCollection<StationInfo> _stationInfoCollection;
 
         private ConnectionFactory _connectionFactory;
 
@@ -20,7 +20,7 @@ namespace ActualizacionService
 
         private IModel _channel;
 
-        public Worker(ILogger<Worker> logger)
+        public BicisInfoWorker(ILogger<BicisInfoWorker> logger)
         {
             _logger = logger;
 
@@ -32,11 +32,15 @@ namespace ActualizacionService
 
             var mongoDatabase = mongoClient.GetDatabase("transporte");
 
-            _alertaCollection = mongoDatabase.GetCollection<Alerta>("alertas");
+            _stationInfoCollection = mongoDatabase.GetCollection<StationInfo>("stationinfo");
         }
 
         public override Task StartAsync(CancellationToken cancellationToken)
         {
+            Console.WriteLine("Sleeping to wait for Rabbit...");
+            Task.Delay(10000).Wait();
+            Console.WriteLine("Init Rabbit...");
+
             _connectionFactory = new ConnectionFactory
             {
                 // DOCKER
@@ -50,7 +54,7 @@ namespace ActualizacionService
             };
             _connection = _connectionFactory.CreateConnection();
             _channel = _connection.CreateModel();
-            _channel.QueueDeclare(queue: "hello",
+            _channel.QueueDeclare(queue: "stationinfo",
                                     durable: false,
                                     exclusive: false,
                                     autoDelete: false,
@@ -77,22 +81,37 @@ namespace ActualizacionService
                 {
                     Console.WriteLine("Alertas recibidas!!!");
 
-                    var entities = JsonSerializer.Deserialize<Entity[]>(message);
+                    var stations = JsonSerializer.Deserialize<Data>(message);
 
-                    foreach (var entity in entities)
+                    foreach (var station in stations.Stations)
                     {
-                        var text = entity.Alert.DescriptionText.Translation[0].Text;
-                        _alertaCollection.InsertOne(new Alerta { Message = text });
+                        var stationInfo = new StationInfo
+                        {
+                            IdStation = station.Id,
+                            Name = station.Name,
+                            Address = station.Address,
+                            Capacity = station.Capacity
+                        };
+
+                        var filterDefinition = Builders<StationInfo>.Filter.Eq(p => p.IdStation, stationInfo.IdStation);
+                        var updateDefinition = Builders<StationInfo>.Update
+                        .Set(p => p.IdStation, stationInfo.IdStation)
+                        .Set(p => p.Name, stationInfo.Name)
+                        .Set(p => p.Address, stationInfo.Address)
+                        .Set(p => p.Capacity, stationInfo.Capacity);
+                        var options = new UpdateOptions { IsUpsert = true };
+                        _stationInfoCollection.UpdateOne(filterDefinition, updateDefinition, options);
                     }
                     _channel.BasicAck(ea.DeliveryTag, false);
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine("ERROR!!!: " + ex.Message);
                     _channel.BasicNack(ea.DeliveryTag, false, false);
                 }
             };
 
-            _channel.BasicConsume(queue: "hello", autoAck: false, consumer: consumer);       
+            _channel.BasicConsume(queue: "stationinfo", autoAck: false, consumer: consumer);
 
             await Task.CompletedTask;
         }

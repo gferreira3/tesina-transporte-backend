@@ -14,6 +14,15 @@ builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient("mongodb://mon
 //LOCALHOST
 //builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient("mongodb://localhost:27017"));
 
+builder.Services.AddCors(options =>
+{
+  options.AddDefaultPolicy(
+      policy =>
+      {
+        policy.AllowAnyOrigin();
+      });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -23,7 +32,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.MapGet("/colectivos/alertas", (IMongoClient client) =>
+app.MapGet("/subtes/alertas", (IMongoClient client) =>
 {
     var mongoDatabase = client.GetDatabase("transporte");
 
@@ -32,4 +41,23 @@ app.MapGet("/colectivos/alertas", (IMongoClient client) =>
     return alertaCollection.Find(_ => true).ToList();
 });
 
+app.MapGet("/bicis/info", (IMongoClient client) =>
+{
+    var mongoDatabase = client.GetDatabase("transporte");
+
+    var stationCollection = mongoDatabase.GetCollection<StationInfo>("stationinfo");
+
+    return stationCollection.Find(_ => true).ToList();
+});
+
+app.MapGet("/bicis/status", (IMongoClient client) =>
+{
+    var mongoDatabase = client.GetDatabase("transporte");
+
+    var stationCollection = mongoDatabase.GetCollection<StationStatus>("stationstatus");
+
+    return stationCollection.Find(_ => true).ToList();
+});
+
+app.UseCors();
 app.Run();

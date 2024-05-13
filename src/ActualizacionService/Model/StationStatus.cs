@@ -3,16 +3,16 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace ActualizacionService.Model
 {
-    public  class Alerta
+    public  class StationStatus
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
 
-        [BsonElement("idalerta")]
-        public string IdAlerta { get; set; }
+        [BsonElement("idstation")]
+        public string IdStation { get; set; }
 
-        [BsonElement("mensaje")]
-        public string Mensaje { get; set; }
+        [BsonElement("bikesavailable")]
+        public int BikesAvailable { get; set; }
     }
 }
