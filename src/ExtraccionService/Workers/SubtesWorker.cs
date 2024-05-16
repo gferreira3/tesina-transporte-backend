@@ -50,8 +50,6 @@ namespace ExtraccionService.Workers
                                     basicProperties: null,
                                     body: body);
 
-                Console.WriteLine("Alertas enviadas!!!");
-
                 await Task.Delay(10000, stoppingToken);
             }
         }

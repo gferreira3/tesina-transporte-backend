@@ -34,6 +34,8 @@ if (app.Environment.IsDevelopment())
 
 app.MapGet("/subtes/alertas", (IMongoClient client) =>
 {
+    Console.WriteLine("Request recibido: /subtes/alertas");
+
     var mongoDatabase = client.GetDatabase("transporte");
 
     var alertaCollection = mongoDatabase.GetCollection<Alerta>("alertas");
@@ -48,10 +50,13 @@ app.MapGet("/bicis/info", (IMongoClient client) =>
     var stationCollection = mongoDatabase.GetCollection<StationInfo>("stationinfo");
 
     return stationCollection.Find(_ => true).ToList();
+    
 });
 
 app.MapGet("/bicis/status", (IMongoClient client) =>
 {
+    Console.WriteLine("Request recibido: /bicis/status");
+
     var mongoDatabase = client.GetDatabase("transporte");
 
     var stationCollection = mongoDatabase.GetCollection<StationStatus>("stationstatus");

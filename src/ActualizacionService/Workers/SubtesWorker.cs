@@ -79,8 +79,6 @@ namespace ActualizacionService.Workers
                 var message = Encoding.UTF8.GetString(ea.Body.ToArray());
                 try
                 {
-                    Console.WriteLine("Alertas recibidas!!!");
-
                     var entities = JsonSerializer.Deserialize<Entity[]>(message);
 
                     foreach (var entity in entities)
