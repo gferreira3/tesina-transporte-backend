@@ -1,5 +1,6 @@
 using MongoDB.Driver;
-using TransporteApi.Model;
+using TransporteApiMono.Model;
+using TransporteApiMono.Workers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,19 +9,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//DOCKER
 builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient("mongodb://mongo:27017"));
-
-//LOCALHOST
-//builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient("mongodb://localhost:27017"));
+builder.Services.AddHostedService<SubtesWorker>();
+builder.Services.AddHostedService<BicisStatusWorker>();
+builder.Services.AddHostedService<BicisInfoWorker>();
 
 builder.Services.AddCors(options =>
 {
-  options.AddDefaultPolicy(
-      policy =>
-      {
-        policy.AllowAnyOrigin();
-      });
+    options.AddDefaultPolicy(
+        policy =>
+        {
+            policy.AllowAnyOrigin();
+        });
 });
 
 var app = builder.Build();
@@ -46,13 +46,13 @@ app.MapGet("/subtes/alertas", (IMongoClient client) =>
 app.MapGet("/bicis/info", (IMongoClient client) =>
 {
     Console.WriteLine("Request recibido: /bicis/info");
-    
+
     var mongoDatabase = client.GetDatabase("transporte");
 
     var stationCollection = mongoDatabase.GetCollection<StationInfo>("stationinfo");
 
     return stationCollection.Find(_ => true).ToList();
-    
+
 });
 
 app.MapGet("/bicis/status", (IMongoClient client) =>
