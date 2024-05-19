@@ -7,22 +7,13 @@ namespace TransporteApiMono.Workers
 {
     public class SubtesWorker : BackgroundService
     {
-        private readonly ILogger<SubtesWorker> _logger;
-
         private readonly IMongoCollection<Alerta> _alertaCollection;
 
         private static readonly HttpClient client = new();
 
         public SubtesWorker(ILogger<SubtesWorker> logger)
         {
-            _logger = logger;
-
-            // DOCKER
             var mongoClient = new MongoClient("mongodb://mongo:27017");
-
-            // LOCALHOST
-            //var mongoClient = new MongoClient("mongodb://localhost:27017");
-
             var mongoDatabase = mongoClient.GetDatabase("transporte");
 
             _alertaCollection = mongoDatabase.GetCollection<Alerta>("alertas");

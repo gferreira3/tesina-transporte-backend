@@ -7,15 +7,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TransporteApi", "src\Transp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{262D87B8-0560-48E6-A452-A9F5113647B8}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{A3A2FBF8-9D06-4180-B9A4-B40D56388339}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ActualizacionService", "src\ActualizacionService\ActualizacionService.csproj", "{48FDC583-3851-46FD-A483-39F8D53C5BF4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExtraccionService", "src\ExtraccionService\ExtraccionService.csproj", "{EEE429F5-EBE6-4161-9DB9-AC617C96E189}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mono", "mono", "{4E37CE29-D5B4-4047-9CD9-D16847D1004B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransporteApiMono", "mono\TransporteApiMono\TransporteApiMono.csproj", "{45E44184-E4F7-426F-825E-FF90B449C549}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TransporteApiMono", "mono\TransporteApiMono\TransporteApiMono.csproj", "{45E44184-E4F7-426F-825E-FF90B449C549}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

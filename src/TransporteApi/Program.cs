@@ -8,11 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//DOCKER
-builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient("mongodb://mongo:27017"));
 
-//LOCALHOST
-//builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient("mongodb://localhost:27017"));
+builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient("mongodb://mongo:27017"));
 
 builder.Services.AddCors(options =>
 {

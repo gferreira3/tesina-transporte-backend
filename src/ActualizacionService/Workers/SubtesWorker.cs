@@ -10,8 +10,6 @@ namespace ActualizacionService.Workers
 {
     public class SubtesWorker : BackgroundService
     {
-        private readonly ILogger<SubtesWorker> _logger;
-
         private readonly IMongoCollection<Alerta> _alertaCollection;
 
         private ConnectionFactory _connectionFactory;
@@ -22,14 +20,7 @@ namespace ActualizacionService.Workers
 
         public SubtesWorker(ILogger<SubtesWorker> logger)
         {
-            _logger = logger;
-
-            // DOCKER
             var mongoClient = new MongoClient("mongodb://mongo:27017");
-
-            // LOCALHOST
-            //var mongoClient = new MongoClient("mongodb://localhost:27017");
-
             var mongoDatabase = mongoClient.GetDatabase("transporte");
 
             _alertaCollection = mongoDatabase.GetCollection<Alerta>("alertas");
@@ -43,10 +34,7 @@ namespace ActualizacionService.Workers
 
             _connectionFactory = new ConnectionFactory
             {
-                // DOCKER
                 HostName = "rabbitmq",
-                // LOCALHOST
-                //HostName = "localhost",
                 Port = 5672,
                 UserName = "guest",
                 Password = "guest",
@@ -85,10 +73,6 @@ namespace ActualizacionService.Workers
                     {
                         var text = entity.Alert.DescriptionText.Translation[0].Text;
                         var routeId = entity.Alert.InformedEntity[0].RouteID;
-                        /*_alertaCollection.InsertOne(new Alerta {
-                            IdAlerta = entity.Id,
-                            Mensaje = string.Format("{0} - {1}", routeId, text)
-                        });*/
                         var alerta = new Alerta
                         {
                             IdAlerta = entity.Id,
@@ -102,9 +86,8 @@ namespace ActualizacionService.Workers
                     }
                     _channel.BasicAck(ea.DeliveryTag, false);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    Console.WriteLine("ERROR!!!: " + ex.Message);
                     _channel.BasicNack(ea.DeliveryTag, false, false);
                 }
             };

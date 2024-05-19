@@ -7,14 +7,7 @@ namespace ExtraccionService.Workers
 {
     public class SubtesWorker : BackgroundService
     {
-        private readonly ILogger<SubtesWorker> _logger;
-
         private static readonly HttpClient client = new();
-
-        public SubtesWorker(ILogger<SubtesWorker> logger)
-        {
-            _logger = logger;
-        }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -22,12 +15,7 @@ namespace ExtraccionService.Workers
             Task.Delay(10000).Wait();
             Console.WriteLine("Init Rabbit...");
 
-            // DOCKER
             var factory = new ConnectionFactory() { HostName = "rabbitmq", Port = 5672, UserName = "guest", Password = "guest" };
-
-            // LOCALHOST
-            //var factory = new ConnectionFactory() { HostName = "localhost", Port = 5672, UserName = "guest", Password = "guest" };
-
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
 

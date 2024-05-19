@@ -7,22 +7,13 @@ namespace TransporteApiMono.Workers
 {
     public class BicisInfoWorker : BackgroundService
     {
-        private readonly ILogger<BicisInfoWorker> _logger;
-
         private readonly IMongoCollection<StationInfo> _stationInfoCollection;
 
         private static readonly HttpClient client = new();
 
         public BicisInfoWorker(ILogger<BicisInfoWorker> logger)
         {
-            _logger = logger;
-
-            // DOCKER
             var mongoClient = new MongoClient("mongodb://mongo:27017");
-
-            // LOCALHOST
-            //var mongoClient = new MongoClient("mongodb://localhost:27017");
-
             var mongoDatabase = mongoClient.GetDatabase("transporte");
 
             _stationInfoCollection = mongoDatabase.GetCollection<StationInfo>("stationinfo");
@@ -52,6 +43,7 @@ namespace TransporteApiMono.Workers
                     .Set(p => p.Name, stationInfo.Name)
                     .Set(p => p.Address, stationInfo.Address)
                     .Set(p => p.Capacity, stationInfo.Capacity);
+
                     var options = new UpdateOptions { IsUpsert = true };
                     _stationInfoCollection.UpdateOne(filterDefinition, updateDefinition, options);
                 }
